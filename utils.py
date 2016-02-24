@@ -91,7 +91,10 @@ class DataLoader():
         self.data.append(data)
         counter += int(len(data) / ((self.seq_length+2))) 
 
+    print counter
     self.num_batches = int(counter / self.batch_size)
+    print self.num_batches
+    exit(0)
 
   def next_batch(self):
     # returns a randomised, seq_length sized portion of the training data
