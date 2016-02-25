@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 class DataLoader():
-  def __init__(self, batch_size=50, seq_length=300, scale_factor = 10, limit = 500):
+  def __init__(self, batch_size=50, seq_length=300, scale_factor = 1, limit = 500):
     self.data_dir = "./data"
     self.pose_dir = "/home/supasorn/face-singleview/data/Obama2/"
 
@@ -51,16 +51,21 @@ class DataLoader():
         n_point = 0
         stroke_data = np.zeros((len(stroke), len(stroke[0])), dtype=np.float32)
 
-        prev_x = 0
-        prev_y = 0
+        #counter = 1
+        #prev = [0] * len(stroke[0])
+        #for j in range(1, len(stroke)):
+            #for k in range(len(stroke[j])):
+                #stroke_data[counter, k] = float(stroke[j][k])
+                #prev[k] = float(stroke[j][k])
+            #counter += 1
         counter = 0
-        prev = [0] * len(stroke[0])
-        for j in range(len(stroke)):
+        prev = stroke[0]
+        for j in range(0, len(stroke)):
             for k in range(len(stroke[j])):
                 stroke_data[counter, k] = float(stroke[j][k]) - prev[k]
                 prev[k] = float(stroke[j][k])
             counter += 1
-        
+
         print stroke_data
         return stroke_data
 
@@ -88,13 +93,10 @@ class DataLoader():
     for data in self.raw_data:
       if len(data) >= (self.seq_length+2):
         data *= self.scale_factor
-        self.data.append(data)
+        self.data.append(data[:, :3])
         counter += int(len(data) / ((self.seq_length+2))) 
 
-    print counter
     self.num_batches = int(counter / self.batch_size)
-    print self.num_batches
-    exit(0)
 
   def next_batch(self):
     # returns a randomised, seq_length sized portion of the training data

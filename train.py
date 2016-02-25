@@ -13,15 +13,15 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--rnn_size', type=int, default=256,
                      help='size of RNN hidden state')
-  parser.add_argument('--num_layers', type=int, default=2,
+  parser.add_argument('--num_layers', type=int, default=3,
                      help='number of layers in the RNN')
   parser.add_argument('--model', type=str, default='lstm',
                      help='rnn, gru, or lstm')
   parser.add_argument('--batch_size', type=int, default=50,
                      help='minibatch size')
-  parser.add_argument('--seq_length', type=int, default=100,
+  parser.add_argument('--seq_length', type=int, default=300,
                      help='RNN sequence length')
-  parser.add_argument('--num_epochs', type=int, default=30,
+  parser.add_argument('--num_epochs', type=int, default=200,
                      help='number of epochs')
   parser.add_argument('--save_every', type=int, default=500,
                      help='save frequency')
@@ -33,7 +33,7 @@ def main():
                      help='decay rate for rmsprop')
   parser.add_argument('--num_mixture', type=int, default=20,
                      help='number of gaussian mixtures')
-  parser.add_argument('--data_scale', type=float, default=20,
+  parser.add_argument('--data_scale', type=float, default=1,
                      help='factor to scale raw data down by')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
@@ -49,6 +49,7 @@ def train(args):
 
     model = Model(args)
 
+    checkpoint_path = os.path.join('save', 'model.ckpt')
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
         saver = tf.train.Saver(tf.all_variables())
@@ -67,9 +68,11 @@ def train(args):
                             args.num_epochs * data_loader.num_batches,
                             e, train_loss, end - start)
                 if (e * data_loader.num_batches + b) % args.save_every == 0 and ((e * data_loader.num_batches + b) > 0):
-                    checkpoint_path = os.path.join('save', 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print "model saved to {}".format(checkpoint_path)
+
+        saver.save(sess, checkpoint_path)
+        print "model saved to {}".format(checkpoint_path)
 
 if __name__ == '__main__':
   main()
