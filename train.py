@@ -37,11 +37,13 @@ def main():
                      help='factor to scale raw data down by')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
+  parser.add_argument('--reprocess', type=int, default=0,
+                     help='reprocess input')
   args = parser.parse_args()
   train(args)
 
 def train(args):
-    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale)
+    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale, reprocess=args.reprocess)
     x, y = data_loader.next_batch()
 
     with open(os.path.join('save', 'config.pkl'), 'w') as f:

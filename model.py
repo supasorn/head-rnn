@@ -132,10 +132,11 @@ class Model():
       return x[0]
       #return mu
 
-    pose = np.array([-0.066771, 0.038186, 0.016590, 3.095364, 16.073411, -18813.618895])
+    #pose = np.array([-0.066771, 0.038186, 0.016590, 3.095364, 16.073411, -18813.618895])
+    pose = np.array([0, 0, 0, 3.095364, 16.073411, -18813.618895])
+    #pose = np.array([0000.00017, -000.00031, 0000.00278, 3.095364, 16.073411, -18813.618895])
     prev_x = np.zeros((1, 1, self.dim), dtype=np.float32)
-
-    #prev_x[0][0] = pose[:3]
+    #prev_x[0][0] = pose[:self.dim]
 
     prev_state = sess.run(self.cell.zero_state(1, tf.float32))
     f = open("output.txt", "w")
@@ -151,7 +152,7 @@ class Model():
       nxt = sample_gaussian_2d(o_mu[0][idx::self.num_mixture], o_sig[0][idx::self.num_mixture])
       #pose += nxt / self.args.data_scale
       #pose[:3] += nxt / self.args.data_scale
-      pose[:3] += nxt  / self.args.data_scale
+      pose[:self.dim] += nxt / self.args.data_scale
       print pose
       f.write(" ".join(["%f" % x for x in pose]) + "\n")
 
