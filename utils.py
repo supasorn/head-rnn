@@ -6,14 +6,14 @@ import random
 import math
 
 class DataLoader():
-  def __init__(self, batch_size=50, seq_length=300, scale_factor = 1, limit = 500, reprocess = 0):
+  def __init__(self, dim = 3, batch_size=50, seq_length=300, scale_factor = 1, reprocess = 0):
     self.data_dir = "./data"
     self.pose_dir = "/home/supasorn/face-singleview/data/Obama2/"
 
+    self.dim = dim
     self.batch_size = batch_size
     self.seq_length = seq_length
     self.scale_factor = scale_factor # divide data by this factor
-    self.limit = limit # removes large noisy gaps in the data
 
     data_file = os.path.join(self.data_dir, "training.cpkl")
 
@@ -53,65 +53,26 @@ class DataLoader():
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
 
   def preprocess(self, data_dir, data_file):
-    # create data file from raw xml files from iam handwriting source.
+    f = open("/home/supasorn/face-singleview/data/Obama2/pose_training.txt", "r")
+    sumn = 0
 
-    files = [x.split("\t")[0] for x in open(data_dir + "processed.txt", "r").readlines()]
-    filelist = []
-    for i in range(len(files)):
-        dnums = sorted([os.path.basename(x) for x in glob.glob(data_dir  + files[i] + "}}*")])
-        for dnum in dnums:
-            filelist.append(dnum)
-
-
-    # function to read each individual xml file
-    def getStrokes(filename):
-        print "in", filename
-        num = 1
-        result = []
-        while os.path.exists(filename + "/%04d.txt" % num):
-            f = open(filename + "/%04d.txt" % num, "r")
-            pose = [float(x) for x in f.read().strip().split(" ")[:6]]
-            # convert rodrigues to euler
-            pose[:3] = self.rodriguesToEuler(pose[0], pose[1], pose[2])
-
-            result.append(pose)
-            num += 1
-        return result
-
-    # converts a list of arrays into a 2d numpy int16 array
-    def convert_stroke_to_array(stroke):
-
-        n_point = 0
-        stroke_data = np.zeros((len(stroke), len(stroke[0])), dtype=np.float32)
-
-        counter = 0
-        prev = [0] * len(stroke[0])
-        for j in range(0, len(stroke)):
-            for k in range(len(stroke[j])):
-                stroke_data[counter, k] = float(stroke[j][k]) - prev[k]
-                prev[k] = float(stroke[j][k])
-            counter += 1
-
-        #counter = 0
-        #prev = stroke[0]
-        #for j in range(0, len(stroke)):
-            #for k in range(len(stroke[j])):
-                #stroke_data[counter, k] = float(stroke[j][k]) - prev[k]
-                #prev[k] = float(stroke[j][k])
-            #counter += 1
-
-        print stroke_data
-        return stroke_data
-
-    # build stroke database of every xml file inside iam database
     strokes = []
-    for i in range(len(filelist)):
-        if os.path.exists(data_dir + filelist[i] + "/poses2/"):
-            print 'processing '+filelist[i]
-            # array of [len x dim]
-            strokes.append(convert_stroke_to_array(getStrokes(data_dir + filelist[i] + "/poses2/")))
+    while True:
+        dnum = f.readline()
+        if not dnum: break
+        n = int(f.readline())
+        sumn += n
+        stroke = np.zeros((n, self.dim), dtype=np.float32)
+        print dnum, n
+        for i in range(n):
+            st = f.readline().split(" ")
+            stroke[i, :] = np.array(self.rodriguesToEuler(float(st[1]), float(st[2]), float(st[3])))
+        strokes.append(stroke)
 
-    f = open(data_file,"wb")
+    f.close()
+    print sumn
+
+    f = open(data_file, "wb")
     cPickle.dump(strokes, f, protocol=2)
     f.close()
 
@@ -125,16 +86,14 @@ class DataLoader():
     self.data = []
     counter = 0
 
-    for i, data in enumerate(self.raw_data):
-      f = open("data/%04d.txt" % i, "w")
+    for data in self.raw_data:
       if len(data) >= (self.seq_length+2):
         data *= self.scale_factor
-        self.data.append(data[:, :3])
-        counter += int(len(data) / ((self.seq_length+2))) 
-        for j in range(len(data)):
-            f.write(" ".join(["%010.5F" % x for x in data[j]]) + "\n")
-      f.close()
+        diff = data - np.concatenate([data[:1,:], data[:-1,:]])
+        self.data.append(diff)
 
+        counter += int(len(data) / ((self.seq_length+2))) 
+      f.close()
     self.num_batches = int(counter / self.batch_size)
 
   def next_batch(self):

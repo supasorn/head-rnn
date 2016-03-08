@@ -1,10 +1,5 @@
-import numpy as np
-import tensorflow as tf
-
-import argparse
-import time
-import os
-import cPickle
+import sys
+execfile(sys.path[0] + "/../utils/tensorutils.py")
 
 from utils import DataLoader
 from model import Model
@@ -21,9 +16,9 @@ def main():
                      help='minibatch size')
   parser.add_argument('--seq_length', type=int, default=300,
                      help='RNN sequence length')
-  parser.add_argument('--num_epochs', type=int, default=200,
+  parser.add_argument('--num_epochs', type=int, default=50,
                      help='number of epochs')
-  parser.add_argument('--save_every', type=int, default=500,
+  parser.add_argument('--save_every', type=int, default=10,
                      help='save frequency')
   parser.add_argument('--grad_clip', type=float, default=10.,
                      help='clip gradients at this value')
@@ -33,7 +28,7 @@ def main():
                      help='decay rate for rmsprop')
   parser.add_argument('--num_mixture', type=int, default=20,
                      help='number of gaussian mixtures')
-  parser.add_argument('--data_scale', type=float, default=1,
+  parser.add_argument('--data_scale', type=float, default=100,
                      help='factor to scale raw data down by')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
@@ -43,7 +38,7 @@ def main():
   train(args)
 
 def train(args):
-    data_loader = DataLoader(args.batch_size, args.seq_length, args.data_scale, reprocess=args.reprocess)
+    data_loader = DataLoader(3, args.batch_size, args.seq_length, args.data_scale, reprocess=args.reprocess)
     x, y = data_loader.next_batch()
 
     with open(os.path.join('save', 'config.pkl'), 'w') as f:
@@ -51,30 +46,22 @@ def train(args):
 
     model = Model(args)
 
-    checkpoint_path = os.path.join('save', 'model.ckpt')
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
-        saver = tf.train.Saver(tf.all_variables())
-        for e in xrange(args.num_epochs):
+
+        ts = TrainingStatus(sess, args.num_epochs, data_loader.num_batches, save_interval = args.save_every, graph_def = sess.graph_def)
+        for e in xrange(ts.startEpoch, args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
             state = model.initial_state.eval()
             for b in xrange(data_loader.num_batches):
-                start = time.time()
+                ts.tic()
                 x, y = data_loader.next_batch()
                 feed = {model.input_data: x, model.target_data: y, model.initial_state: state}
-                train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
-                end = time.time()
-                print "{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
-                    .format(e * data_loader.num_batches + b,
-                            args.num_epochs * data_loader.num_batches,
-                            e, train_loss, end - start)
-                if (e * data_loader.num_batches + b) % args.save_every == 0 and ((e * data_loader.num_batches + b) > 0):
-                    saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
-                    print "model saved to {}".format(checkpoint_path)
-
-        saver.save(sess, checkpoint_path)
-        print "model saved to {}".format(checkpoint_path)
+                summary, train_loss, state, _ = sess.run([model.summary, model.cost, model.final_state, model.train_op], feed)
+                print ts.tocBatch(summary, e, b, train_loss)
+                
+            ts.tocEpoch(sess, e)
 
 if __name__ == '__main__':
   main()
