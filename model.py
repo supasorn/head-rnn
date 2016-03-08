@@ -128,9 +128,9 @@ class Model():
       return -1
 
     def sample_gaussian_2d(mu, sig):
-      x = np.random.multivariate_normal(mu, np.diag(sig) ** 2, 1)
-      return x[0]
-      #return mu
+      #x = np.random.multivariate_normal(mu, np.diag(sig) ** 2, 1)
+      #return x[0]
+      return mu
 
     #pose = np.array([-0.066771, 0.038186, 0.016590, 3.095364, 16.073411, -18813.618895])
     pose = np.array([0, 0, 0, 3.095364, 16.073411, -18813.618895])
@@ -146,8 +146,8 @@ class Model():
       feed = {self.input_data: prev_x, self.initial_state:prev_state}
 
       [o_pi, o_mu, o_sig, next_state] = sess.run([self.pi, self.mu, self.sig, self.final_state],feed)
-      idx = get_pi_idx(random.random(), o_pi[0])
-      #idx = np.argmax(o_pi[0])
+      #idx = get_pi_idx(random.random(), o_pi[0])
+      idx = np.argmax(o_pi[0])
 
       nxt = sample_gaussian_2d(o_mu[0][idx::self.num_mixture], o_sig[0][idx::self.num_mixture])
       #pose += nxt / self.args.data_scale

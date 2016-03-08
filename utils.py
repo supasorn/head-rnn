@@ -108,6 +108,7 @@ class DataLoader():
     for i in range(len(filelist)):
         if os.path.exists(data_dir + filelist[i] + "/poses2/"):
             print 'processing '+filelist[i]
+            # array of [len x dim]
             strokes.append(convert_stroke_to_array(getStrokes(data_dir + filelist[i] + "/poses2/")))
 
     f = open(data_file,"wb")
