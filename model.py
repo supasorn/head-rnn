@@ -6,8 +6,8 @@ import numpy as np
 import random
 
 class Model():
-  def __init__(self, args, infer=False):
-    self.dim = 3
+  def __init__(self, dim, args, infer=False):
+    self.dim = dim 
     self.args = args
     if infer:
       args.batch_size = 1
@@ -154,8 +154,9 @@ class Model():
 
       nxt = sample_gaussian_2d(o_mu[0][idx::self.num_mixture], o_sig[0][idx::self.num_mixture])
       #pose += nxt / self.args.data_scale
-      #pose[:3] += nxt / self.args.data_scale
-      pose[:self.dim] += nxt / self.args.data_scale
+      #pose[:self.dim] += nxt / self.args.data_scale
+      pose[:self.dim] = np.divide(nxt, np.array([100, 100, 100, 1, 1, 0.001]))
+      #pose[:self.dim] = nxt / self.args.data_scale
       print pose
       f.write(" ".join(["%f" % x for x in pose]) + "\n")
 

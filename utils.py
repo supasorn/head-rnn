@@ -6,14 +6,13 @@ import random
 import math
 
 class DataLoader():
-  def __init__(self, dim = 3, batch_size=50, seq_length=300, scale_factor = 1, reprocess = 0):
+  def __init__(self, dim = 3, batch_size=50, seq_length=300, reprocess = 0):
     self.data_dir = "./data"
     self.pose_dir = "/home/supasorn/face-singleview/data/Obama2/"
 
     self.dim = dim
     self.batch_size = batch_size
     self.seq_length = seq_length
-    self.scale_factor = scale_factor # divide data by this factor
 
     data_file = os.path.join(self.data_dir, "training.cpkl")
 
@@ -57,6 +56,7 @@ class DataLoader():
     sumn = 0
 
     strokes = []
+    
     while True:
         dnum = f.readline()
         if not dnum: break
@@ -66,8 +66,12 @@ class DataLoader():
         print dnum, n
         for i in range(n):
             st = f.readline().split(" ")
-            stroke[i, :] = np.array(self.rodriguesToEuler(float(st[1]), float(st[2]), float(st[3])))
-        strokes.append(stroke)
+            stroke[i, :3] = np.array(self.rodriguesToEuler(float(st[1]), float(st[2]), float(st[3])))
+            for j in range(3, self.dim):
+                stroke[i, j] = st[j + 1]
+            
+                
+        strokes.append(np.multiply(stroke, np.array([100, 100, 100, 1, 1, 0.001])))
 
     f.close()
     print sumn
@@ -75,6 +79,8 @@ class DataLoader():
     f = open(data_file, "wb")
     cPickle.dump(strokes, f, protocol=2)
     f.close()
+
+    np.savetxt("data/data.txt", np.concatenate(strokes, 0), "%.3f")
 
 
   def load_preprocessed(self, data_file):
@@ -88,9 +94,12 @@ class DataLoader():
 
     for data in self.raw_data:
       if len(data) >= (self.seq_length+2):
-        data *= self.scale_factor
-        diff = data - np.concatenate([data[:1,:], data[:-1,:]])
+        diff = data - np.concatenate([np.zeros((len(data), 3)), np.concatenate([data[:1,3:], data[:-1,3:]])], axis=1)
         self.data.append(diff)
+        #self.data.append(data)
+        #print data
+        #print diff
+        #exit(0)
 
         counter += int(len(data) / ((self.seq_length+2))) 
       f.close()

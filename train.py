@@ -28,8 +28,6 @@ def main():
                      help='decay rate for rmsprop')
   parser.add_argument('--num_mixture', type=int, default=20,
                      help='number of gaussian mixtures')
-  parser.add_argument('--data_scale', type=float, default=100,
-                     help='factor to scale raw data down by')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
   parser.add_argument('--reprocess', type=int, default=0,
@@ -38,13 +36,14 @@ def main():
   train(args)
 
 def train(args):
-    data_loader = DataLoader(3, args.batch_size, args.seq_length, args.data_scale, reprocess=args.reprocess)
+    dim = 6
+    data_loader = DataLoader(dim, args.batch_size, args.seq_length, reprocess=args.reprocess)
     x, y = data_loader.next_batch()
 
     with open(os.path.join('save', 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
 
-    model = Model(args)
+    model = Model(dim, args)
 
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
