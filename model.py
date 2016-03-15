@@ -131,7 +131,7 @@ class Model():
       return -1
 
     def sample_gaussian_2d(mu, sig):
-      x = np.random.multivariate_normal(mu, np.diag(sig) ** 2, 1)
+      x = np.random.multivariate_normal(mu, np.diag(sig / 5) ** 2, 1)
       return x[0]
       #return mu
 
@@ -155,7 +155,10 @@ class Model():
       nxt = sample_gaussian_2d(o_mu[0][idx::self.num_mixture], o_sig[0][idx::self.num_mixture])
       #pose += nxt / self.args.data_scale
       #pose[:self.dim] += nxt / self.args.data_scale
-      pose[:self.dim] = np.divide(nxt, np.array([100, 100, 100, 1, 1, 0.001]))
+      #pose[:self.dim] = np.divide(nxt, np.array([100, 100, 100, 1, 1, 0.001]))
+      pose[:3] = np.divide(nxt[:3], np.array([100, 100, 100]))
+      pose[3:] += np.divide(nxt[3:], np.array([1, 1, 0.001]))
+
       #pose[:self.dim] = nxt / self.args.data_scale
       print pose
       f.write(" ".join(["%f" % x for x in pose]) + "\n")
