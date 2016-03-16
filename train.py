@@ -8,7 +8,11 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('--rnn_size', type=int, default=256,
                      help='size of RNN hidden state')
+<<<<<<< HEAD
   parser.add_argument('--num_layers', type=int, default=6,
+=======
+  parser.add_argument('--num_layers', type=int, default=4,
+>>>>>>> 37fd518ed7c7722cecb35502effb9b59820e49a4
                      help='number of layers in the RNN')
   parser.add_argument('--model', type=str, default='lstm',
                      help='rnn, gru, or lstm')
@@ -24,7 +28,11 @@ def main():
                      help='clip gradients at this value')
   parser.add_argument('--learning_rate', type=float, default=0.005,
                      help='learning rate')
+<<<<<<< HEAD
   parser.add_argument('--decay_rate', type=float, default=0.98,
+=======
+  parser.add_argument('--decay_rate', type=float, default=0.97,
+>>>>>>> 37fd518ed7c7722cecb35502effb9b59820e49a4
                      help='decay rate for rmsprop')
   parser.add_argument('--num_mixture', type=int, default=20,
                      help='number of gaussian mixtures')
