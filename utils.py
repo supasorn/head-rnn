@@ -8,7 +8,8 @@ import math
 class DataLoader():
   def __init__(self, dim = 3, batch_size=50, seq_length=300, reprocess = 0):
     self.data_dir = "./data"
-    self.pose_dir = "/home/supasorn/face-singleview/data/Obama2/"
+    #self.pose_dir = "/home/supasorn/face-singleview/data/Obama2/"
+    self.pose_dir = "/projects/grail/supasorn2nb/face-singleview/data/Obama2/"
 
     self.dim = dim
     self.batch_size = batch_size
@@ -52,7 +53,7 @@ class DataLoader():
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
 
   def preprocess(self, data_dir, data_file):
-    f = open("/home/supasorn/face-singleview/data/Obama2/pose_training.txt", "r")
+    f = open("/projects/grail/supasorn2nb/face-singleview/data/Obama2/pose_training.txt", "r")
     sumn = 0
 
     strokes = []
