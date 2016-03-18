@@ -136,7 +136,7 @@ class Model():
       #return mu
 
     #pose = np.array([-0.066771, 0.038186, 0.016590, 3.095364, 16.073411, -18813.618895])
-    pose = np.array([0, 0, 0, 3.095364, 16.073411, -18813.618895])
+    pose = np.array([0, 0, 0, 2.095364, 16.073411, -18813.618895])
     #pose = np.array([0000.00017, -000.00031, 0000.00278, 3.095364, 16.073411, -18813.618895])
     prev_x = np.zeros((1, 1, self.dim), dtype=np.float32)
     #prev_x[0][0] = pose[:self.dim]
@@ -158,6 +158,7 @@ class Model():
       #pose[:self.dim] = np.divide(nxt, np.array([100, 100, 100, 1, 1, 0.001]))
       pose[:3] = np.divide(nxt[:3], np.array([100, 100, 100]))
       pose[3:] += np.divide(nxt[3:], np.array([1, 1, 0.001]))
+      #pose[3:-1] += np.divide(nxt[3:-1], np.array([1, 1]))
 
       #pose[:self.dim] = nxt / self.args.data_scale
       print pose

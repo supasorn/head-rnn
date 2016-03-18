@@ -63,23 +63,33 @@ class DataLoader():
     sumn = 0
 
     strokes = []
+    stats = []
     
     while True:
-        dnum = f.readline()
-        if not dnum: break
-        n = int(f.readline())
-        sumn += n
-        stroke = np.zeros((n, self.dim), dtype=np.float32)
-        print dnum, n
-        for i in range(n):
-            st = f.readline().split(" ")
-            stroke[i, :3] = np.array(self.rodriguesToEuler(float(st[1]), float(st[2]), float(st[3])))
-            for j in range(3, self.dim):
-                stroke[i, j] = st[j + 1]
-            
-                
-        strokes.append(np.multiply(stroke, np.array([100, 100, 100, 1, 1, 0.001])))
+      dnum = f.readline()
+      if not dnum: break
+      n = int(f.readline())
+      sumn += n
+      stroke = np.zeros((n, self.dim), dtype=np.float32)
+      print dnum, n
+      for i in range(n):
+        st = f.readline().split(" ")
+        stroke[i, :3] = np.array(self.rodriguesToEuler(float(st[1]), float(st[2]), float(st[3])))
+        for j in range(3, self.dim):
+          stroke[i, j] = st[j + 1]
+      strokes.append(np.multiply(stroke, np.array([100, 100, 100, 1, 1, 0.001])))
 
+      stats.append(np.multiply(stroke, np.array([180 / math.pi,180 / math.pi,180 / math.pi, 1, 1, 1])))
+      stats.append(stroke)
+
+    allstats = np.concatenate(stats)
+    np.savetxt("stats.txt", allstats, "%.3f");
+    
+    #print np.mean(allstats, axis=0)
+    #print np.std(allstats, axis=0)
+    #print allstats.min(axis=0)
+    #print allstats.max(axis=0)
+    #exit(0)
     f.close()
     print sumn
 
