@@ -45,31 +45,34 @@ def main():
     train(args)
 
 def train(args):
-    dim = 6
-    data_loader = DataLoader(dim, args.batch_size, args.seq_length, reprocess=args.reprocess)
-    x, y = data_loader.next_batch()
+  dim = 6
+  data_loader = DataLoader(dim, args.batch_size, args.seq_length, reprocess=args.reprocess)
+  x, y = data_loader.next_batch()
 
-    with open(os.path.join(args.save_dir, 'config.pkl'), 'w') as f:
-        cPickle.dump(args, f)
+  if not os.path.exists(args.save_dir):
+    os.mkdir(args.save_dir)
 
-    model = Model(dim, args)
+  with open(os.path.join(args.save_dir, 'config.pkl'), 'w') as f:
+    cPickle.dump(args, f)
 
-    with tf.Session() as sess:
-        tf.initialize_all_variables().run()
+  model = Model(dim, args)
 
-        ts = TrainingStatus(sess, args.num_epochs, data_loader.num_batches, save_interval = args.save_every, graph_def = sess.graph_def, save_dir = args.save_dir)
-        for e in xrange(ts.startEpoch, args.num_epochs):
-            sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
-            data_loader.reset_batch_pointer()
-            state = model.initial_state.eval()
-            for b in xrange(data_loader.num_batches):
-                ts.tic()
-                x, y = data_loader.next_batch()
-                feed = {model.input_data: x, model.target_data: y, model.initial_state: state}
-                summary, train_loss, state, _ = sess.run([model.summary, model.cost, model.final_state, model.train_op], feed)
-                print ts.tocBatch(summary, e, b, train_loss)
-                
-            ts.tocEpoch(sess, e)
+  with tf.Session() as sess:
+    tf.initialize_all_variables().run()
+
+    ts = TrainingStatus(sess, args.num_epochs, data_loader.num_batches, save_interval = args.save_every, graph_def = sess.graph_def, save_dir = args.save_dir)
+    for e in xrange(ts.startEpoch, args.num_epochs):
+      sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
+      data_loader.reset_batch_pointer()
+      state = model.initial_state.eval()
+      for b in xrange(data_loader.num_batches):
+        ts.tic()
+        x, y = data_loader.next_batch()
+        feed = {model.input_data: x, model.target_data: y, model.initial_state: state}
+        summary, train_loss, state, _ = sess.run([model.summary, model.cost, model.final_state, model.train_op], feed)
+        print ts.tocBatch(summary, e, b, train_loss)
+        
+      ts.tocEpoch(sess, e)
 
 def sample(args):
   with open(os.path.join(args.save_dir, 'config.pkl')) as f:
