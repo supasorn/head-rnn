@@ -86,7 +86,7 @@ def sample(args):
   print "loading model: ",ckpt.model_checkpoint_path
 
   saver.restore(sess, ckpt.model_checkpoint_path)
-  model.sample(sess, sample_args.sample_length)
+  model.sample(sess, args.sample_length)
 
 
 if __name__ == '__main__':
