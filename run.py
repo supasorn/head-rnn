@@ -32,6 +32,8 @@ def main():
                      help='dropout keep probability')
   parser.add_argument('--save_dir', type=str, default='save'
                      help='dropout keep probability')
+  parser.add_argument('--sample_length', type=int, default=500,
+                     help='number of strokes to sample')
 
   parser.add_argument('--sample', action='store_true')
   parser.add_argument('--reprocess', action='store_true')
