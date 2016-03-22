@@ -30,7 +30,7 @@ def main():
                      help='number of gaussian mixtures')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
-  parser.add_argument('--save_dir', type=str, default='save'
+  parser.add_argument('--save_dir', type=str, default='save',
                      help='dropout keep probability')
   parser.add_argument('--sample_length', type=int, default=500,
                      help='number of strokes to sample')
