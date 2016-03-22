@@ -30,17 +30,24 @@ def main():
                      help='number of gaussian mixtures')
   parser.add_argument('--keep_prob', type=float, default=0.8,
                      help='dropout keep probability')
-  parser.add_argument('--reprocess', type=int, default=0,
-                     help='reprocess input')
+  parser.add_argument('--save_dir', type=str, default='save'
+                     help='dropout keep probability')
+
+  parser.add_argument('--sample', action='store_true')
+  parser.add_argument('--reprocess', action='store_true')
   args = parser.parse_args()
-  train(args)
+
+  if args.sample:
+    sample(args)
+  else:
+    train(args)
 
 def train(args):
     dim = 6
     data_loader = DataLoader(dim, args.batch_size, args.seq_length, reprocess=args.reprocess)
     x, y = data_loader.next_batch()
 
-    with open(os.path.join('save', 'config.pkl'), 'w') as f:
+    with open(os.path.join(args.save_dir, 'config.pkl'), 'w') as f:
         cPickle.dump(args, f)
 
     model = Model(dim, args)
@@ -48,7 +55,7 @@ def train(args):
     with tf.Session() as sess:
         tf.initialize_all_variables().run()
 
-        ts = TrainingStatus(sess, args.num_epochs, data_loader.num_batches, save_interval = args.save_every, graph_def = sess.graph_def)
+        ts = TrainingStatus(sess, args.num_epochs, data_loader.num_batches, save_interval = args.save_every, graph_def = sess.graph_def, save_dir = args.save_dir)
         for e in xrange(ts.startEpoch, args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
@@ -61,6 +68,21 @@ def train(args):
                 print ts.tocBatch(summary, e, b, train_loss)
                 
             ts.tocEpoch(sess, e)
+
+def sample(args):
+  with open(os.path.join(args.save_dir, 'config.pkl')) as f:
+    saved_args = cPickle.load(f)
+
+  model = Model(6, saved_args, True)
+  sess = tf.InteractiveSession()
+  saver = tf.train.Saver()
+
+  ckpt = tf.train.get_checkpoint_state('save')
+  print "loading model: ",ckpt.model_checkpoint_path
+
+  saver.restore(sess, ckpt.model_checkpoint_path)
+  model.sample(sess, sample_args.sample_length)
+
 
 if __name__ == '__main__':
   main()

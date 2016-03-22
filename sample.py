@@ -17,8 +17,6 @@ from IPython.display import SVG, display
 # main code (not in a main function since I want to run this script in IPython as well).
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--filename', type=str, default='sample',
-                   help='filename of .svg file to output, without .svg')
 parser.add_argument('--sample_length', type=int, default=500,
                    help='number of strokes to sample')
 parser.add_argument('--scale_factor', type=int, default=10,

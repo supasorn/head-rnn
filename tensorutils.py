@@ -8,17 +8,17 @@ import cPickle
 
 
 class TrainingStatus:
-    def __init__(self, sess, num_epochs, num_batches, logwrite_interval = 25, eta_interval = 25, save_interval = 100, log_dir = "logs", save_dir = "save", graph_def = None):
-        if not os.path.exists(log_dir):
-            os.mkdir(log_dir)
+    def __init__(self, sess, num_epochs, num_batches, logwrite_interval = 25, eta_interval = 25, save_interval = 100, save_dir = "save", graph_def = None):
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
         
         if graph_def is not None:
-            self.writer = tf.train.SummaryWriter(log_dir, graph_def)
+            self.writer = tf.train.SummaryWriter(save_dir, graph_def)
         else:
-            self.writer = tf.train.SummaryWriter(log_dir)
+            self.writer = tf.train.SummaryWriter(save_dir)
 
         self.save_dir = os.path.join(save_dir, 'model.ckpt')
-        self.saver = tf.train.Saver(tf.all_variables())
+        self.saver = tf.train.Saver(tf.all_variables(), max_to_keep = 0)
 
         lastCheckpoint = tf.train.latest_checkpoint(save_dir) 
         if lastCheckpoint is None:
