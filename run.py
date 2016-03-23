@@ -3,6 +3,7 @@ execfile(sys.path[0] + "/tensorutils.py")
 
 from utils import DataLoader
 from model import Model
+import json
 
 def main():
   parser = argparse.ArgumentParser()
