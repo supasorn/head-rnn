@@ -57,7 +57,7 @@ class Model():
     x_data = flat_target_data
 
     def tf_normal(x, mu, sig):
-        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig))) / (sig * tf.sqrt(2 * np.pi))
+        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig + 0.01))) / ((sig + 0.01) * tf.sqrt(2 * np.pi))
 
     
     def tf_multi_normal(x, mu, sig, ang):
