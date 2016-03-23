@@ -82,7 +82,7 @@ def sample(args):
   sess = tf.InteractiveSession()
   saver = tf.train.Saver()
 
-  ckpt = tf.train.get_checkpoint_state('save')
+  ckpt = tf.train.get_checkpoint_state(args.save_dir)
   print "loading model: ",ckpt.model_checkpoint_path
 
   saver.restore(sess, ckpt.model_checkpoint_path)
