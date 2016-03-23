@@ -74,7 +74,7 @@ class Model():
         # We're parametrizing using L^-1
         # Sigma^-1 = (L^-1)'(L^-1)
         # |Sigma| = 1 / det(L^-1)^2 = 1 / (diagonal product of L^-1)^2
-        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig))) / (sig * tf.sqrt(2 * np.pi))
+        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig + 0.01))) / ((sig + 0.01) * tf.sqrt(2 * np.pi))
         
 
     def get_lossfunc(z_pi, z_mu, z_sig, x_data):

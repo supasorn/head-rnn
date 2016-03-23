@@ -6,6 +6,7 @@ from model import Model
 import json
 
 def main():
+  np.random.seed(42)
   parser = argparse.ArgumentParser()
   parser.add_argument('--rnn_size', type=int, default=256,
                      help='size of RNN hidden state')
