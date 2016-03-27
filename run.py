@@ -18,7 +18,7 @@ def main():
                      help='minibatch size')
   parser.add_argument('--seq_length', type=int, default=300,
                      help='RNN sequence length')
-  parser.add_argument('--num_epochs', type=int, default=100,
+  parser.add_argument('--num_epochs', type=int, default=200,
                      help='number of epochs')
   parser.add_argument('--save_every', type=int, default=10,
                      help='save frequency')
@@ -27,6 +27,8 @@ def main():
   parser.add_argument('--learning_rate', type=float, default=0.005,
                      help='learning rate')
   parser.add_argument('--decay_rate', type=float, default=0.97,
+                     help='decay rate for rmsprop')
+  parser.add_argument('--sig_epsilon', type=float, default=0.00001,
                      help='decay rate for rmsprop')
   parser.add_argument('--num_mixture', type=int, default=20,
                      help='number of gaussian mixtures')

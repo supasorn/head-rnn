@@ -57,10 +57,10 @@ class Model():
     x_data = flat_target_data
 
     def tf_normal(x, mu, sig):
-        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig + 0.01))) / ((sig + 0.01) * tf.sqrt(2 * np.pi))
+        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig))) / (sig * tf.sqrt(2 * np.pi))
 
     
-    def tf_multi_normal(x, mu, sig, ang):
+    #def tf_multi_normal(x, mu, sig, ang):
         # use n (n+1) / 2 to parametrize covariance matrix
         # 1. http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.31.494&rep=rep1&type=pdf
         # 2. https://en.wikipedia.org/wiki/Triangular_matrix
@@ -74,9 +74,9 @@ class Model():
         # We're parametrizing using L^-1
         # Sigma^-1 = (L^-1)'(L^-1)
         # |Sigma| = 1 / det(L^-1)^2 = 1 / (diagonal product of L^-1)^2
-        return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig + 0.01))) / ((sig + 0.01) * tf.sqrt(2 * np.pi))
+        #return tf.exp(-tf.square(x - mu) / (2 * tf.square(sig + 0.01))) / ((sig + 0.01) * tf.sqrt(2 * np.pi))
         
-
+    # z_mu, z_sig, x_data [batch_size x mixture], z_pi [batch_size x mixture]
     def get_lossfunc(z_pi, z_mu, z_sig, x_data):
       result0 = tf_normal(x_data, z_mu, z_sig) 
       result1 = tf.reduce_sum(result0 * z_pi, 1, keep_dims=True)
@@ -97,7 +97,7 @@ class Model():
 
     for i in range(self.dim):
         [o_mu, o_sig] = tf.split(1, 2, output_each_dim[i])
-        o_sig = tf.exp(o_sig)
+        o_sig = tf.exp(o_sig) + args.sig_epsilon
 
         self.mu.append(o_mu)
         self.sig.append(o_sig)
@@ -131,7 +131,7 @@ class Model():
       return -1
 
     def sample_gaussian_2d(mu, sig):
-      x = np.random.multivariate_normal(mu, np.diag(sig / 5) ** 2, 1)
+      x = np.random.multivariate_normal(mu, np.diag((sig) / 3) ** 2, 1)
       return x[0]
       #return mu
 
